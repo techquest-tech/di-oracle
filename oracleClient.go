@@ -64,8 +64,15 @@ func init() {
 }
 
 //make sql.DB to gorm.DB, but only support gorm.Raw, nothing else.
-func ToGorm(db *sql.DB) (*gorm.DB, error) {
-	return gorm.Open(mysql.New(mysql.Config{
-		Conn: db,
+func ToGorm(db *sql.DB, logger *zap.Logger) (*gorm.DB, error) {
+	logger.Info("convert sql.DB to gorm.DB")
+	t, err := gorm.Open(mysql.New(mysql.Config{
+		SkipInitializeWithVersion: true,
+		ServerVersion:             "8.0",
+		Conn:                      db,
 	}))
+	if err != nil {
+		logger.Error("init gorm DB failed.", zap.Error(err))
+	}
+	return t, err
 }
